@@ -448,6 +448,7 @@ def setPerformanceFee(fee: uint256):
     @param fee The new performance fee to use.
     """
     assert msg.sender == self.governance
+    assert fee < FEE_MAX 
     self.performanceFee = fee
     log UpdatePerformanceFee(fee)
 
@@ -462,6 +463,7 @@ def setManagementFee(fee: uint256):
     @param fee The new management fee to use.
     """
     assert msg.sender == self.governance
+    assert fee < FEE_MAX 
     self.managementFee = fee
     log UpdateManagementFee(fee)
 
@@ -1060,6 +1062,7 @@ def addStrategy(
     assert not self.emergencyShutdown
 
     assert msg.sender == self.governance
+    assert performanceFee < FEE_MAX 
     assert self.strategies[strategy].activation == 0
     assert self == Strategy(strategy).vault()
     assert self.token.address == Strategy(strategy).want()
@@ -1138,6 +1141,7 @@ def updateStrategyPerformanceFee(
     @param performanceFee The new fee the strategist will receive.
     """
     assert msg.sender == self.governance
+    assert performanceFee < FEE_MAX
     assert self.strategies[strategy].activation > 0
     self.strategies[strategy].performanceFee = performanceFee
     log StrategyUpdatePerformanceFee(strategy, performanceFee)
