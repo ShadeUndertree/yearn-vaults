@@ -907,6 +907,7 @@ def maxAvailableShares() -> uint256:
 
 
 @external
+@nonreentrant("withdraw")
 def withdraw(_shares: uint256 = MAX_UINT256, recipient: address = msg.sender) -> uint256:
     """
     @notice

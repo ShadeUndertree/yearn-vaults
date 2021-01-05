@@ -9,7 +9,15 @@ import {BaseStrategy, StrategyParams} from "../BaseStrategy.sol";
  * for integrators on how to use BaseStrategy
  */
 
+interface VaultLike {
+    function withdraw(uint256 shares, address recipient) external;
+
+    function balanceOf(address holder) external view returns (uint256);
+}
+
 contract TestStrategy is BaseStrategy {
+    bool public doReentrancy;
+
     constructor(address _vault) public BaseStrategy(_vault) {}
 
     function name() external override view returns (string memory) {
@@ -19,6 +27,11 @@ contract TestStrategy is BaseStrategy {
     // NOTE: This is a test-only function to simulate losses
     function _takeFunds(uint256 amount) public {
         want.transfer(msg.sender, amount);
+    }
+
+    // NOTE: This is a test-only function to enable reentrancy on withdraw
+    function _toggleReentrancyExploit() public {
+        doReentrancy = !doReentrancy;
     }
 
     function estimatedTotalAssets() public override view returns (uint256) {
@@ -59,6 +72,12 @@ contract TestStrategy is BaseStrategy {
     }
 
     function liquidatePosition(uint256 _amountNeeded) internal override returns (uint256 _liquidatedAmount, uint256 _loss) {
+        if (doReentrancy) {
+            // simulate a malicious protocol or reentrancy situation triggered by strategy withdraw interactions
+            uint256 stratBalance = VaultLike(address(vault)).balanceOf(address(this));
+            VaultLike(address(vault)).withdraw(stratBalance, address(this));
+        }
+
         uint256 totalAssets = want.balanceOf(address(this));
         if (_amountNeeded > totalAssets) {
             _liquidatedAmount = totalAssets;
