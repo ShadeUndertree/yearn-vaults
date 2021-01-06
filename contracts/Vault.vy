@@ -102,7 +102,7 @@ struct StrategyParams:
 event StrategyAdded:
     strategy: indexed(address)
     debtLimit: uint256  # Maximum borrow amount
-    rateLimit: uint256  # Increase/decrease per block
+    rateLimit: uint256  # Max increase in debt per second since last harvest
     performanceFee: uint256  # Strategist's fee (basis points)
 
 
@@ -1054,8 +1054,7 @@ def addStrategy(
     @param strategy The address of the Strategy to add.
     @param debtLimit The quantity of assets `strategy` can manage.
     @param rateLimit
-        How many assets per block this Vault may deposit to or withdraw from
-        `strategy`.
+        The max increase in debt per second since last harvest for strategy
     @param performanceFee
         The fee the strategist will receive based on this Vault's performance.
     """
@@ -1119,7 +1118,7 @@ def updateStrategyRateLimit(
 
         This may only be called by governance or management.
     @param strategy The Strategy to update.
-    @param rateLimit The quantity of assets `strategy` may now manage.
+    @param rateLimit The max increase in debt per second since last harvest for strategy
     """
     assert msg.sender in [self.management, self.governance]
     assert self.strategies[strategy].activation > 0
