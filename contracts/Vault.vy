@@ -1401,14 +1401,14 @@ def expectedReturn(strategy: address = msg.sender) -> uint256:
 def _reportLoss(strategy: address, _loss: uint256):
     # Loss can only be up the amount of debt issued to strategy
     totalDebt: uint256 = self.strategies[strategy].totalDebt
-    loss: uint256 = min(_loss, totalDebt)
-    self.strategies[strategy].totalLoss += loss
-    self.strategies[strategy].totalDebt = totalDebt - loss
-    self.totalDebt -= loss
+    assert totalDebt >= _loss
+    self.strategies[strategy].totalLoss += _loss
+    self.strategies[strategy].totalDebt = totalDebt - _loss
+    self.totalDebt -= _loss
 
     # Also, make sure we reduce our trust with the strategy by the same amount
     debtLimit: uint256 = self.strategies[strategy].debtLimit
-    self.strategies[strategy].debtLimit -= min(loss, debtLimit)
+    self.strategies[strategy].debtLimit -= min(_loss, debtLimit)
 
 
 @internal
