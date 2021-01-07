@@ -182,6 +182,8 @@ abstract contract BaseStrategy {
 
     event UpdatedDebtThreshold(uint256 debtThreshold);
 
+    event EnabledEmergencyExit();
+
     // The minimum number of seconds between harvest calls. See
     // `setMinReportDelay()` for more details.
     uint256 public minReportDelay = 86400; // ~ once a day
@@ -656,6 +658,8 @@ abstract contract BaseStrategy {
     function setEmergencyExit() external onlyAuthorized {
         emergencyExit = true;
         vault.revokeStrategy();
+
+        emit EnabledEmergencyExit();
     }
 
     /**
